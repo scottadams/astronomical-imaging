@@ -9,7 +9,7 @@ hdr = mosaic[0].header				#loads hdr with header data
 image = mosaic[0].data				#loads image with image data
 
 image[30:40, 10:20] = 500			#set pixels y=31 to 40 and x=11 to 20 to 500
-mosaic.writeto('newimage.fits')		#writes modified image to new fits file
+mosaic.writeto('newimage.fits', clobber=True)	#writes modified image to new fits file
 
 plt.imshow(image)					#renders image for matplotlib
 plt.show()
