@@ -1,6 +1,7 @@
 import math							#import math
 from astropy.io import fits			#import fits
 import numpy as np					#import numpy
+import numpy.ma as ma 				#import masked arrays
 import matplotlib.pyplot as plt		#import matplotlib
 import mask as ms 					#import mask
 
@@ -10,20 +11,15 @@ hdr = mosaic[0].header				#loads hdr with header data
 image = mosaic[0].data				#loads image with image data
 
 mag = hdr['MAGZPT']-2.5*np.log10(image)			#convert pixel count to magnitude
+mask = ms.perim(50, image)						#create mask
 
-mask = ms.perim(50, image)
-image[mask] = 0
+x = ma.array(image)								#create maskable array using image data
+x.mask = mask 									#set mask as mask
 
-
-
-mosaic.writeto('newimage.fits', clobber=True)	#writes modified image to new fits file
-
-plt.imshow(image)					#renders image for matplotlib
-plt.show()							#draws image
-
-
-
+plt.imshow(x)					#renders image for matplotlib
+plt.show()						#draws image
 
 
 ############ MIGHT BE USEFUL LATER ##############
-image[30:40, 10:20] = 500						#set pixels y=31 to 40 and x=11 to 20 to 500
+#image[30:40, 10:20] = 500						#set pixels y=31 to 40 and x=11 to 20 to 500
+#mosaic.writeto('newimage.fits', clobber=True)	#writes modified image to new fits file
