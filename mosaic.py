@@ -13,10 +13,20 @@ image = mosaic[0].data				#loads image with image data
 mag = hdr['MAGZPT']-2.5*np.log10(image)			#convert pixel count to magnitude
 mask = ms.perim(50, image)						#create mask
 
-x = ma.array(image)								#create maskable array using image data
-x.mask = mask 									#set mask as mask
+z = ma.array(image)								#create maskable array using image data
+z.mask = mask 									#set mask as mask
 
-plt.imshow(x)					#renders image for matplotlib
+shape = z.shape
+result = np.zeros(shape)
+for x in range(0, shape[0]):
+    for y in range(0, shape[1]):
+        if z[x, y] >= 60000:
+            result[x, y] = 65000
+
+
+
+plt.imshow(z)					#renders image for matplotlib
+plt.colorbar()					#show colour scale
 plt.show()						#draws image
 
 
