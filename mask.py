@@ -19,10 +19,10 @@ def perim(image,borderdepth):
         perimask[:,x]=True
         perimask[:,imgwidth-x]=True
 
-    maskedimage = ma.array(image)                                #create maskable array using image data
-    maskedimage.mask = perimask                                  #set mask as mask
+    #maskedimage = ma.array(image)                                #create maskable array using image data
+    #maskedimage.mask = perimask                                  #set mask as mask
 
-    return maskedimage
+    return perimask
 
 
 def circle(image,centre,radius):
@@ -39,8 +39,7 @@ def circle(image,centre,radius):
     # generate circular mask
     circmask = r2 <= radius*radius
 
-    maskedimage = ma.array(image)                                #create maskable array using image data
-    maskedimage.mask = circmask                        #set mask as mask
-    
+    #maskedimage = ma.array(image)                                #create maskable array using image data
+    #maskedimage.mask = circmask                        #set mask as mask
 
-    return maskedimage
+    return circmask
