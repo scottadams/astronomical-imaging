@@ -38,6 +38,6 @@ def bleed(image, borderdepth):
 
     mask1 = ms.circle(image, [3215,1436], 62)
 
-    master = merge.merge(master, mask1) 
+    master = merge.merge(master, mask1)
 
     return master
