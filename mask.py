@@ -43,3 +43,13 @@ def circle(image,centre,radius):
     #maskedimage.mask = circmask                        #set mask as mask
 
     return circmask
+
+def rectangle(image, x1, x2, y1, y2):
+    rectmask = np.zeros(image.shape, dtype=bool)
+    rectmask[y1:y2,x1:x2] = True
+
+    return rectmask
+
+
+
+
