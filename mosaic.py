@@ -8,11 +8,14 @@ import printer as p 				#import printer
 import merge                        #import merge
 import scan							#import scan
 import bleeder as bld 				#import bleeder+perim mask maker
+import smooth
 
 
 mosaic = fits.open('mosaic.fits')	#loads fit file into mosaic
 hdr = mosaic[0].header				#loads hdr with header data
 image = ma.array(mosaic[0].data)	#loads image with image data
+
+image = smooth.smooth(image)		#remove zeros and replace with median
 
 mag = hdr['MAGZPT']-2.5*np.log10(image)        #convert pixel count to magnitude
 

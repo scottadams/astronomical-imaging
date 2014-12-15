@@ -1,5 +1,6 @@
 import mask as ms
 import merge
+import numpy as np
 
 def bleed(image, borderdepth):
     
@@ -41,3 +42,42 @@ def bleed(image, borderdepth):
     master = merge.merge(master, mask1)
 
     return master
+
+def star_rad(image, bg, n_obj):
+
+    imgheight = image.shape[0]-1
+    imgwidth = image.shape[1]-1
+
+    for y in range (0,n_obj):
+        
+        max = image.max()
+        list = image.flatten()
+        location = np.where(list == max)[0]
+
+        length = location.size
+
+        for z in range (0, length-1):
+
+            ycoord = int(location[z]/2570)
+            xcoord = location[z]-(2570*ycoord)
+
+            pos = [ycoord, xcoord]
+
+
+            for x in range (0,imgwidth-pos[1]):
+                a = [image[pos[0],pos[1]+x-1], image[pos[0],pos[1]+x], image[pos[0],pos[1]+x+1]]
+                b = np.array(a)
+                m = np.median(b)
+                if m<bg:
+                    print x
+                    break
+
+
+
+
+
+
+
+
+
+
