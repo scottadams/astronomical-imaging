@@ -19,6 +19,8 @@ image = smooth.smooth(image)		#remove zeros and replace with median
 
 mag = hdr['MAGZPT']-2.5*np.log10(image)        #convert pixel count to magnitude
 
+master = bld.obj_rad(image, 3500, 3)
+
 master = bld.bleed(mag, 75)
 mag.mask = master
 
