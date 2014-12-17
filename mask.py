@@ -7,7 +7,7 @@ def perim(image,borderdepth):
 
     imgheight = image.shape[0]-1
     imgwidth = image.shape[1]-1
-    perimask = np.ma.make_mask(image, copy=True, shrink=True,dtype=np.bool)
+    perimask = np.ma.make_mask(image, copy=True, shrink=True,dtype=bool)
 
     perimask[:,:] = False
 
@@ -39,7 +39,7 @@ def circle(image,centre,radius):
     # generate circular mask
     circmask = r2 <= radius*radius
 
-    #maskedimage = ma.array(image)                                #create maskable array using image data
+    #maskedimage = ma.array(image)                      #create maskable array using image data
     #maskedimage.mask = circmask                        #set mask as mask
 
     return circmask

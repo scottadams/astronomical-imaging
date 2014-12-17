@@ -45,9 +45,9 @@ def bleed(image, borderdepth):
 
     return master
 
-def obj_rad(image, bg, n_obj):
+def obj_rad(image, master, bg, n_obj):
 
-    master = ms.perim(image, 0)
+    image.mask = master
 
     for y in range (0,n_obj):
         
@@ -57,7 +57,7 @@ def obj_rad(image, bg, n_obj):
 
         length = location.size
 
-        for z in range (0, length-1):
+        for z in range (0, length):
 
             ycoord = int(location[z]/2570)
             xcoord = location[z]-(2570*ycoord)
@@ -67,6 +67,8 @@ def obj_rad(image, bg, n_obj):
             mask = bld.obj_mask(image, pos, bg)
 
             master = merge.merge(master, mask)
+
+            image.mask = master
 
     return master
 
@@ -81,8 +83,7 @@ def obj_mask(image, pos, bg):
         m = np.median(b)
         if m<bg:
             mask = ms.circle(image, pos, x)
-            return mask                    
-
+            return mask
 
 
 

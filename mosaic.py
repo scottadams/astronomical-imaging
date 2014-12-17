@@ -19,13 +19,15 @@ image = smooth.smooth(image)		#remove zeros and replace with median
 
 mag = hdr['MAGZPT']-2.5*np.log10(image)        #convert pixel count to magnitude
 
-master = bld.obj_rad(image, 3500, 3)
+master = bld.bleed(image, 50)
 
-master = bld.bleed(mag, 75)
+image.mask = master
+
+bright_obj = bld.obj_rad(image, master, 3500, 100)
+
+master = merge.merge(master, bright_obj)
+
 mag.mask = master
-
-pos = scan.scan(mag, 15)
-print pos
 
 p.plot(mag)
 
