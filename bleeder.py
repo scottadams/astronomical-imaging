@@ -1,3 +1,6 @@
+#This script contains key functions for masking data points (foreground and borders)
+#Hopefully its commented well enough to be followed.
+
 import mask as ms
 import merge
 import numpy as np
