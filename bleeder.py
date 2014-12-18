@@ -18,7 +18,7 @@ def mask_foreground(image, borderdepth):
     #The following mask are created by defining a rectangular area within which bleeding of the main
     #star occurs. Every array element above the background value, defined in 'bleedmask', will be masked.
     #The masks are then merged into the master mask.
-    mask1 = ms.bleedmask(image, 1430, 1445, 0, imgheight) 
+    mask1 = ms.bleedmask(image, 1425, 1445, 0, imgheight) 
     master = merge.merge(master, mask1)
 
     mask1 = ms.bleedmask(image, 1400, 1475, 0, 500)
@@ -76,9 +76,9 @@ def mask_bright_objs(image, master, bg, n_obj): #This routine generates masks fo
 
             pos = [ycoord, xcoord]              #stores the xy co-ordinates in pos
             print pos                           #print position so we know which pixel is the problem if program fails
-            mask = bld.obj_mask(image, pos, bg) #creates a circular mask over the image
+            new_mask = bld.obj_mask(image, pos, bg) #creates a circular mask over the image
 
-            master = merge.merge(master, mask)  #merges the most recent mask to the master
+            master = merge.merge(master, new_mask)  #merges the most recent mask to the master
 
             image.mask = master                 #applies the mask to the image so that we don't count the same objects when we repeat the loop
 
@@ -90,13 +90,18 @@ def obj_mask(image, pos, bg):                   #function to determine whether t
     rad_x = bld.obj_mask_y(image, pos, bg)      #calculate max extent in x direction
     rad_y = bld.obj_mask_x(image, pos, bg)      #calculate max extent in y direction
 
+    mask = ms.bleedmask(image, pos[1]-rad_x, pos[1]+rad_x, pos[0]-rad_y, pos[0]+rad_y)
+
+    return mask
+
+    """
     if rad_x>rad_y:                             #if extent in x is greater
         mask = ms.circle(image, pos, rad_x)     #create mask using x extent as radius
         return mask
 
     if rad_y>rad_x:                             #if extent in y is greater
         mask = ms.circle(image, pos, rad_y)     #create mask using y extent as radius
-        return mask
+        return mask"""
 
 
 #The following two function do the same thing but for y and x axes respectively

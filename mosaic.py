@@ -26,7 +26,7 @@ master = bld.mask_foreground(image, 100)
 
 masked_img.mask = master
 
-bright_obj = bld.mask_bright_objs(masked_img, master, 3500, 12)
+bright_obj = bld.mask_bright_objs(masked_img, master, 3500, 20)
 
 master = merge.merge(master, bright_obj)
 
