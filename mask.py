@@ -30,6 +30,8 @@ def circle(image,centre,radius):
 
     shape = image.shape
 
+    circmask = np.zeros(image.shape, dtype=bool)
+
     x,y = np.ogrid[:shape[0],:shape[1]]
     cx,cy = centre
 
@@ -37,18 +39,35 @@ def circle(image,centre,radius):
     r2 = (x-cx)*(x-cx) + (y-cy)*(y-cy)
 
     # generate circular mask
-    circmask = r2 <= radius*radius
+    circle = r2 <= radius*radius
 
-    #maskedimage = ma.array(image)                      #create maskable array using image data
-    #maskedimage.mask = circmask                        #set mask as mask
+    circmask[circle] = True
 
     return circmask
 
+
+
 def rectangle(image, x1, x2, y1, y2):
+# calculates a rectangular mask according within the given values
     rectmask = np.zeros(image.shape, dtype=bool)
     rectmask[y1:y2,x1:x2] = True
 
     return rectmask
+
+
+
+def bleedmask(image, x1, x2, y1, y2):
+# create a mask by comapring values within an area to the background
+    mask = np.zeros(image.shape, dtype=bool)    #create an array of zeros with the same dimensions
+
+    for x in range (x1, x2):                    #examine all the pixels within
+        for y in range(y1, y2):                 #the defined area
+            if image[y,x]>4000:                 #if pixel value is larger than background
+                mask[y,x] = True                #create mask at this point.
+
+    return mask
+
+
 
 
 
