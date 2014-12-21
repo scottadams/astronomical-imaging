@@ -1,5 +1,4 @@
-#This currently does not work, need to work on the logic. Been testing on test object @[3722,2330]
-#Perhap would be better to build test array
+#THIS FUNCTION IS NO LONGER RELEVANT BUT IS KEPT IN CASE ITS USEFUL LATER
 
 import numpy as np
 

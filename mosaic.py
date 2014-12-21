@@ -13,21 +13,31 @@ import smooth
 
 mosaic = fits.open('mosaic.fits')	#loads fit file into mosaic
 hdr = mosaic[0].header				#loads hdr with header data
-image = ma.array(mosaic[0].data)	#loads image with image data
-
+image = mosaic[0].data				#loads image with image data
 image = smooth.smooth(image)		#remove zeros and replace with median
+
+masked_img = ma.array(image)		#create mask copy of image to mask incase we need an unmasked image later
 
 mag = hdr['MAGZPT']-2.5*np.log10(image)        #convert pixel count to magnitude
 
-master = bld.bleed(mag, 75)
-mag.mask = master
+masked_mag = hdr['MAGZPT']-2.5*np.log10(masked_img)        #create mask copy of mag in case we need and umasked mag later
 
-pos = scan.scan(mag, 15)
-print pos
+master = bld.mask_foreground(image, 100)		#create a mask which masks the main foreground objects and border
 
-p.plot(mag)
+masked_img.mask = master						#apply the master mask
+
+bright_obj = bld.mask_bright_objs(masked_img, master, 4000, 20)	
+
+master = merge.merge(master, bright_obj)
+
+masked_mag.mask = master
+masked_img.mask = master
+
+
+
+p.plot(masked_img)
 
 ############ MIGHT BE USEFUL LATER ############
 #image[30:40, 10:20] = 500						#set pixels y=31 to 40 and x=11 to 20 to 500
-#mosaic.writeto('newimage.fits', clobber=True)	#writes modified image to new fits file
+#mosaic.writeto('masked.fits', clobber=True)	#writes modified image to new fits file
 
