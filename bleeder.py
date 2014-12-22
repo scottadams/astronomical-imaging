@@ -61,7 +61,8 @@ def mask_foreground(image, borderdepth):
 
 def mask_bright_objs(image, master, bg, n_obj): #This routine generates masks for n number of objects
 
-    for y in range (0,n_obj):                   #Dictates how many loops of the cycle are done
+    #for y in range (0,n_obj):                   #Dictates how many loops of the cycle are done
+    while image.max()>30000:
 
         max = image.max()                       #finds the max value in the image
         list = image.flatten()                  #flattens the image into a 1D list
@@ -136,8 +137,48 @@ def obj_mask_x(image, pos, bg):
 
 
 
+def catalogue(image, master, bg):
 
+    while image.max()>4000:                   #Dictates how many loops of the cycle are done
 
+        max = image.max()                       #finds the max value in the image
+        list = image.flatten()                  #flattens the image into a 1D list
+        location = np.where(list == max)[0]     #finds the position of all the maxima
 
+        length = location.size                  #calculates how many maxima are present
+
+        for z in range (0, length):             #Loop which repeats as many times as there are maxima
+
+            ycoord = int(location[z]/2570)      #calculates the x and y co-ordinates
+            xcoord = location[z]-(2570*ycoord)  #using the fact we know the shape of the original image
+
+            pos = [ycoord, xcoord]              #stores the xy co-ordinates in pos
+            rad_x = bld.obj_mask_x(image, pos, bg)
+            rad_y = bld.obj_mask_y(image, pos, bg)
+
+            if rad_y>rad_x:
+                pixel_count = bld.photometry(image, pos, bg, rad_y)
+            else:
+                pixel_count = bld.photometry(image, pos, bg, rad_x)
+
+            
+
+            new_mask = bld.obj_mask(image, pos, bg) #creates a circular mask over the image
+
+            master = merge.merge(master, new_mask)  #merges the most recent mask to the master
+
+            image.mask = master                 #applies the mask to the image so that we don't count the same objects when we repeat the loop
+
+    return master
+
+def photometry(image, pos, bg, rad):
+
+    for x in range (pos[1]-rad, pos[1]+rad):
+        for y in range (pos[0]-rad, pos[0]+rad):
+            sum += image[y, x]
+
+    sum = sum - (bg*rad*rad)
+
+    return sum
 
 
