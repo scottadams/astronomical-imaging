@@ -167,7 +167,7 @@ def catalogue(image, master, bg):
 
             master = merge.merge(master, new_mask)  #merges the most recent mask to the master
 
-            image.mask = master                 #applies the mask to the image so that we don't count the same objects when we repeat the loop
+            image.mask = master                     #applies the mask to the image so that we don't count the same objects when we repeat the loop
 
     return master
 
