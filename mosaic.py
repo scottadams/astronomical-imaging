@@ -14,7 +14,7 @@ import smooth
 mosaic = fits.open('mosaic.fits')	#loads fit file into mosaic
 hdr = mosaic[0].header				#loads hdr with header data
 image = mosaic[0].data				#loads image with image data
-image = smooth.smooth(image)		#remove zeros and replace with median
+image = smooth.zeros(image)			#remove zeros and replace with median
 
 masked_img = ma.array(image)		#create mask copy of image to mask incase we need an unmasked image later
 
