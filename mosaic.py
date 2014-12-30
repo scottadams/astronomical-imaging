@@ -30,10 +30,11 @@ bright_obj = bld.mask_bright_objs(masked_img, master, 4000, 20)
 
 master = merge.merge(master, bright_obj)
 
-masked_mag.mask = master
 masked_img.mask = master
 
+master = bld.catalogue(masked_img, master, 5000)
 
+masked_mag.mask = master
 
 p.plot(masked_img)
 

@@ -91,7 +91,8 @@ def obj_mask(image, pos, bg):                   #function to determine whether t
     rad_x = bld.obj_mask_y(image, pos, bg)      #calculate max extent in x direction
     rad_y = bld.obj_mask_x(image, pos, bg)      #calculate max extent in y direction
 
-    mask = ms.bleedmask(image, pos[1]-rad_x, pos[1]+rad_x, pos[0]-rad_y, pos[0]+rad_y)
+    #mask = ms.bleedmask(image, pos[1]-rad_x, pos[1]+rad_x, pos[0]-rad_y, pos[0]+rad_y)
+    mask = ms.ovalmask(image, pos, rad_x, rad_y)
 
     return mask
 
@@ -109,7 +110,6 @@ def obj_mask(image, pos, bg):                   #function to determine whether t
 def obj_mask_y(image, pos, bg):
 
     imgheight = image.shape[0]-1    #load image dimensions for use later
-    imgwidth = image.shape[1]-1
 
     for y in range (1,imgheight-pos[0]): #create loop from initial position to maximum border
         a = [image[pos[0]+y-2,pos[1]], image[pos[0]+y-1,pos[1]], image[pos[0]+y,pos[1]]] #create an array with the values of 3 successive pixels in the y direction
@@ -139,7 +139,9 @@ def obj_mask_x(image, pos, bg):
 
 def catalogue(image, master, bg):
 
-    while image.max()>4000:                   #Dictates how many loops of the cycle are done
+    f = open('data.csv', 'w')
+
+    while image.max()>20000:                   #Dictates how many loops of the cycle are done
 
         max = image.max()                       #finds the max value in the image
         list = image.flatten()                  #flattens the image into a 1D list
@@ -160,8 +162,8 @@ def catalogue(image, master, bg):
                 pixel_count = bld.photometry(image, pos, bg, rad_y)
             else:
                 pixel_count = bld.photometry(image, pos, bg, rad_x)
-
             
+            f.write('{number},{posx},{posy},{photo} \n'.format(number = z, posx = pos[1], posy = pos[0], photo = pixel_count))
 
             new_mask = bld.obj_mask(image, pos, bg) #creates a circular mask over the image
 
@@ -172,6 +174,7 @@ def catalogue(image, master, bg):
     return master
 
 def photometry(image, pos, bg, rad):
+    sum = 0
 
     for x in range (pos[1]-rad, pos[1]+rad):
         for y in range (pos[0]-rad, pos[0]+rad):

@@ -1,5 +1,7 @@
+from __future__ import division
 import numpy as np
 import numpy.ma as ma
+
 
 
 def perim(image,borderdepth):
@@ -68,7 +70,21 @@ def bleedmask(image, x1, x2, y1, y2):
 
     return mask
 
+def ovalmask(image, pos, radx, rady):
+    mask = np.zeros(image.shape, dtype=bool)
 
+    for x in range (pos[1]-radx, pos[1]+radx):
+        for y in range(pos[0]-rady, pos[0]+rady):
+            a = (x-pos[1])/radx
+            b = (y-pos[0])/rady
+            minor = pow(a, 2.0)
+            major = pow(b, 2.0)
+            oval = minor + major
+            #print 'minor axis {val1}. major axis {val2}. Oval val {val3}.'.format(val1 = a, val2 = b, val3 = oval)
+            if oval <= 1 and image[y,x]>4000:
+                mask[y,x] = True
+
+    return mask
 
 
 
