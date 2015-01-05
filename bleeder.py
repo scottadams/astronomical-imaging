@@ -39,30 +39,36 @@ def mask_foreground(image, borderdepth):
     mask1 = ms.bleedmask(image, 1423, 1450, 2800, 3000)
     master = merge.merge(master, mask1) 
 
-    mask1 = ms.circle(image, [3215,1436], 62)
+    mask1 = ms.circle(image, [3215,1436], 90)
     master = merge.merge(master, mask1)
 
     #The following masks are constructed using the same principle as above but mask the
     #remaining principal foreground objects.
 
-    mask1 = ms.bleedmask(image, 880, 930, 2220, 2360)
+    mask1 = ms.ovalmask(image, [2286, 905], 20, 80)
     master = merge.merge(master, mask1)
 
-    mask1 = ms.bleedmask(image, 750, 795, 3200, 3450)
+    mask1 = ms.ovalmask(image, [3320,775], 25, 130)
     master = merge.merge(master, mask1)
 
-    mask1 = ms.bleedmask(image, 950, 1000, 2700, 2840)
+    mask1 = ms.ovalmask(image, [2773, 973], 25, 85)
     master = merge.merge(master, mask1)
 
-    mask1 = ms.bleedmask(image, 2110, 2160, 2280, 2345)
+    mask1 = ms.ovalmask(image, [3757,2133], 20, 65)
+    master = merge.merge(master, mask1)
+
+    mask1 = ms.ovalmask(image, [2310,2131], 20, 35)
+    master = merge.merge(master, mask1)
+
+    mask1 = ms.ovalmask(image, [1425,2088], 20, 35)
     master = merge.merge(master, mask1)
 
     return master
 
-def mask_bright_objs(image, master, bg, n_obj): #This routine generates masks for n number of objects
+def mask_bright_objs(image, master, lower_limit, bg): #This routine generates masks for n number of objects
 
     #for y in range (0,n_obj):                   #Dictates how many loops of the cycle are done
-    while image.max()>30000:
+    while image.max()>lower_limit:
 
         max = image.max()                       #finds the max value in the image
         list = image.flatten()                  #flattens the image into a 1D list
@@ -76,7 +82,7 @@ def mask_bright_objs(image, master, bg, n_obj): #This routine generates masks fo
             xcoord = location[z]-(2570*ycoord)  #using the fact we know the shape of the original image
 
             pos = [ycoord, xcoord]              #stores the xy co-ordinates in pos
-            print pos                           #print position so we know which pixel is the problem if program fails
+            #print pos                           #print position so we know which pixel is the problem if program fails
             new_mask = bld.obj_mask(image, pos, bg) #creates a circular mask over the image
 
             master = merge.merge(master, new_mask)  #merges the most recent mask to the master
@@ -141,7 +147,7 @@ def catalogue(image, master, bg):
 
     f = open('data.csv', 'w')
 
-    while image.max()>20000:                   #Dictates how many loops of the cycle are done
+    while image.max()>5000:                   #Dictates how many loops of the cycle are done
 
         max = image.max()                       #finds the max value in the image
         list = image.flatten()                  #flattens the image into a 1D list
@@ -175,12 +181,17 @@ def catalogue(image, master, bg):
 
 def photometry(image, pos, bg, rad):
     sum = 0
+    masked_pixels = 0
+    mask = ma.getmaskarray(image)
 
     for x in range (pos[1]-rad, pos[1]+rad):
         for y in range (pos[0]-rad, pos[0]+rad):
-            sum += image[y, x]
+            if mask[y,x] == False:
+                sum += image[y, x]
+            else:
+                masked_pixels += 1
 
-    sum = sum - (bg*rad*rad)
+    sum = sum - bg*(pow(rad, 2.0)-masked_pixels)
 
     return sum
 
