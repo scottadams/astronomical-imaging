@@ -181,18 +181,47 @@ def catalogue(image, master, bg):
 
 def photometry(image, pos, bg, rad):
     sum = 0
-    masked_pixels = 0
+    unmasked_pixels = 0
     mask = ma.getmaskarray(image)
 
     for x in range (pos[1]-rad, pos[1]+rad):
         for y in range (pos[0]-rad, pos[0]+rad):
             if mask[y,x] == False:
                 sum += image[y, x]
-            else:
-                masked_pixels += 1
+                unmasked_pixels
 
-    sum = sum - bg*(pow(rad, 2.0)-masked_pixels)
+    sum = sum - bg*unmasked_pixels
 
     return sum
+
+def ovalphotometry(image, pos, bg, radx, rady):
+    sum = 0
+    unmasked_pixels = 0
+    mask = ma.getmaskarray(image)
+
+
+    for x in range (pos[1]-radx, pos[1]+radx):
+        for y in range(pos[0]-rady, pos[0]+rady):
+            a = (x-pos[1])/radx
+            b = (y-pos[0])/rady
+            minor = pow(a, 2.0)
+            major = pow(b, 2.0)
+            oval = minor + major
+            if oval <= 1 and mask[y,x] = False:
+                sum += image[y,x]
+                unmasked_pixels += 1
+
+    sum = sum - bg*unmasked_pixels
+
+
+
+
+
+
+
+
+
+
+
 
 
