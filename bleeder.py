@@ -165,9 +165,9 @@ def catalogue(image, master, bg):
             rad_y = bld.obj_mask_y(image, pos, bg)
 
             if rad_y>rad_x:
-                pixel_count = bld.photometry(image, pos, bg, rad_y)
+                pixel_count = bld.ovalphotometry(image, pos, bg, rad_y)
             else:
-                pixel_count = bld.photometry(image, pos, bg, rad_x)
+                pixel_count = bld.ovalphotometry(image, pos, bg, rad_x)
             
             f.write('{number},{posx},{posy},{photo} \n'.format(number = z, posx = pos[1], posy = pos[0], photo = pixel_count))
 
