@@ -1,6 +1,6 @@
 #This script contains key functions for masking data points (foreground and borders)
 #Hopefully its commented well enough to be followed.
-
+from __future__ import division
 import mask as ms
 import merge
 import numpy as np
@@ -102,15 +102,6 @@ def obj_mask(image, pos, bg):                   #function to determine whether t
 
     return mask
 
-    """
-    if rad_x>rad_y:                             #if extent in x is greater
-        mask = ms.circle(image, pos, rad_x)     #create mask using x extent as radius
-        return mask
-
-    if rad_y>rad_x:                             #if extent in y is greater
-        mask = ms.circle(image, pos, rad_y)     #create mask using y extent as radius
-        return mask"""
-
 
 #The following two function do the same thing but for y and x axes respectively
 def obj_mask_y(image, pos, bg):
@@ -164,10 +155,7 @@ def catalogue(image, master, bg):
             rad_x = bld.obj_mask_x(image, pos, bg)
             rad_y = bld.obj_mask_y(image, pos, bg)
 
-            if rad_y>rad_x:
-                pixel_count = bld.ovalphotometry(image, pos, bg, rad_y)
-            else:
-                pixel_count = bld.ovalphotometry(image, pos, bg, rad_x)
+            pixel_count = bld.ovalphotometry(image, pos, rad_x, rad_y)
             
             f.write('{number},{posx},{posy},{photo} \n'.format(number = z, posx = pos[1], posy = pos[0], photo = pixel_count))
 
@@ -179,24 +167,26 @@ def catalogue(image, master, bg):
 
     return master
 
-def photometry(image, pos, bg, rad):
+def photometry(image, pos, rad):
     sum = 0
-    unmasked_pixels = 0
+    pixel_count = 0
     mask = ma.getmaskarray(image)
 
     for x in range (pos[1]-rad, pos[1]+rad):
         for y in range (pos[0]-rad, pos[0]+rad):
             if mask[y,x] == False:
                 sum += image[y, x]
-                unmasked_pixels
+                pixel_count += 1
 
-    sum = sum - bg*unmasked_pixels
+    bg = local_background(image, pos, rad, rad)
+
+    sum = sum - bg*pixel_count
 
     return sum
 
-def ovalphotometry(image, pos, bg, radx, rady):
+def ovalphotometry(image, pos, radx, rady):
     sum = 0
-    unmasked_pixels = 0
+    pixel_count = 0
     mask = ma.getmaskarray(image)
 
 
@@ -207,16 +197,40 @@ def ovalphotometry(image, pos, bg, radx, rady):
             minor = pow(a, 2.0)
             major = pow(b, 2.0)
             oval = minor + major
-            if oval <= 1 and mask[y,x] = False:
+            if oval <= 1 and mask[y,x] == False:
                 sum += image[y,x]
-                unmasked_pixels += 1
+                pixel_count += 1
 
-    sum = sum - bg*unmasked_pixels
+    bg = local_background(image, pos, radx, rady)
+
+    sum = sum - bg*pixel_count
 
 
+def local_background(image, pos, radx, rady):
 
+    sum = 0
+    pixel_count = 0
+    mask = ma.getmaskarray(image)
 
+    imgheight = image.shape[0]-1
+    imgwidth = image.shape[1]-1
 
+    annulus = np.zeros(image.shape)
+
+    for x in range (0,imgwidth):
+        for y in range(0,imgheight):
+            a = (x-pos[1])/radx
+            b = (y-pos[0])/rady
+            minor = pow(a, 2.0)
+            major = pow(b, 2.0)
+            oval = minor + major
+            if oval >= 1 and oval <=4 and mask[y,x] == False:
+                sum += image[y,x]
+                pixel_count += 1
+
+    bg = int(sum/pixel_count)
+
+    return bg
 
 
 
