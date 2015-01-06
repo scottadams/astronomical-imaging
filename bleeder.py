@@ -2,6 +2,7 @@
 #Hopefully its commented well enough to be followed.
 from __future__ import division
 import mask as ms
+import math
 import merge
 import numpy as np
 import numpy.ma as ma
@@ -137,6 +138,9 @@ def obj_mask_x(image, pos, bg):
 def catalogue(image, master, bg):
 
     f = open('data.csv', 'w')
+    galaxy_count = 0
+
+    f.write('Galaxy Number,X coord,Y coord,X radius,Y radius,Pixel Count,Magnitude \n')
 
     while image.max()>5000:                   #Dictates how many loops of the cycle are done
 
@@ -156,14 +160,17 @@ def catalogue(image, master, bg):
             rad_y = bld.obj_mask_y(image, pos, bg)
 
             pixel_count = bld.ovalphotometry(image, pos, rad_x, rad_y)
+            #mag = 25.3 - 2.5*math.log(pixel_count,10)
+            galaxy_count += 1
             
-            f.write('{number},{posx},{posy},{photo} \n'.format(number = z, posx = pos[1], posy = pos[0], photo = pixel_count))
+            f.write('{number},{posx},{posy},{rad_x},{rad_y},{photo} \n'.format(number = galaxy_count, posx = pos[1], posy = pos[0], photo = pixel_count, rad_x = rad_x, rad_y = rad_y))
 
             new_mask = bld.obj_mask(image, pos, bg) #creates a circular mask over the image
 
             master = merge.merge(master, new_mask)  #merges the most recent mask to the master
 
             image.mask = master                     #applies the mask to the image so that we don't count the same objects when we repeat the loop
+            print galaxy_count
 
     return master
 
@@ -204,6 +211,8 @@ def ovalphotometry(image, pos, radx, rady):
     bg = local_background(image, pos, radx, rady)
 
     sum = sum - bg*pixel_count
+
+    return sum
 
 
 def local_background(image, pos, radx, rady):
