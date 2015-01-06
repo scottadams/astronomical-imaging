@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 import numpy as np
+import mask as ms
+import numpy.ma as ma
 
 def calc(image):
     shape = image.shape
@@ -22,7 +24,13 @@ mosaic = fits.open('mosaic.fits') #loads fit file into mosaic
 hdr = mosaic[0].header
 image = mosaic[0].data
 
-x = calc(image)
+perimeter_mask = ms.perim(image, 100)
+
+masked_img = ma.array(image)
+
+masked_img.mask = perimeter_mask
+
+x = calc(masked_img)
 
 # the histogram of the data
 n, bins, patches = plt.hist(x, 3000, normed=1, facecolor='green', alpha=0.75)
@@ -34,9 +42,9 @@ n, bins, patches = plt.hist(x, 3000, normed=1, facecolor='green', alpha=0.75)
 plt.xlabel('frequency')
 plt.ylabel('counts')
 plt.title(r'histogram')
-plt.axis([3300, 3600, 0, 0.06])
+#plt.axis([3300, 3600, 0, 0.06])
 plt.grid(True)
 plt.show()
-plt.axis([3300, 3600, 0, 0.1])
-plt.grid(True)
-plt.show()
+#plt.axis([3300, 3600, 0, 0.1])
+#plt.grid(True)
+#plt.show()
