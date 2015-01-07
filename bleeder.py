@@ -19,28 +19,28 @@ def mask_foreground(image, borderdepth):
     #The following mask are created by defining a rectangular area within which bleeding of the main
     #star occurs. Every array element above the background value, defined in 'bleedmask', will be masked.
     #The masks are then merged into the master mask.
-    mask1 = ms.bleedmask(image, 1425, 1445, 0, imgheight) 
+    mask1 = ms.bleedmask(image, 1415, 1455, 0, imgheight) 
     master = merge.merge(master, mask1)
 
-    mask1 = ms.bleedmask(image, 1400, 1475, 0, 500)
+    mask1 = ms.bleedmask(image, 1390, 1485, 0, 500)
     master = merge.merge(master, mask1)
 
-    mask1 = ms.bleedmask(image, 1160, 1650, 420, 450)
+    mask1 = ms.bleedmask(image, 1100, 1660, 400, 460)
     master = merge.merge(master, mask1)
     
-    mask1 = ms.bleedmask(image, 1010, 1700, 308, 333)
+    mask1 = ms.bleedmask(image, 1000, 1690, 298, 343)
     master = merge.merge(master, mask1)
 
-    mask1 = ms.bleedmask(image, 1288, 1523, 115, 140)
+    mask1 = ms.bleedmask(image, 1278, 1533, 105, 150)
     master = merge.merge(master, mask1)
 
-    mask1 = ms.bleedmask(image, 1417, 1457, 3000, 3500)
+    mask1 = ms.bleedmask(image, 1407, 1447, 3000, 3500)
     master = merge.merge(master, mask1)
 
-    mask1 = ms.bleedmask(image, 1423, 1450, 2800, 3000)
+    mask1 = ms.bleedmask(image, 1413, 1460, 2800, 3000)
     master = merge.merge(master, mask1) 
 
-    mask1 = ms.circle(image, [3215,1436], 90)
+    mask1 = ms.circle(image, [3215,1436], 100)
     master = merge.merge(master, mask1)
 
     #The following masks are constructed using the same principle as above but mask the
@@ -140,9 +140,9 @@ def catalogue(image, master, bg):
     f = open('data.csv', 'w')
     galaxy_count = 0
 
-    f.write('Galaxy Number,X coord,Y coord,X radius,Y radius,Pixel Count,Magnitude \n')
+    f.write('Galaxy Number,X coord,Y coord,X radius,Y radius,Pixel Count \n')
 
-    while image.max()>5000:                   #Dictates how many loops of the cycle are done
+    while image.max()>3750:                   #Dictates how many loops of the cycle are done
 
         max = image.max()                       #finds the max value in the image
         list = image.flatten()                  #flattens the image into a 1D list
@@ -221,13 +221,8 @@ def local_background(image, pos, radx, rady):
     pixel_count = 0
     mask = ma.getmaskarray(image)
 
-    imgheight = image.shape[0]-1
-    imgwidth = image.shape[1]-1
-
-    annulus = np.zeros(image.shape)
-
-    for x in range (0,imgwidth):
-        for y in range(0,imgheight):
+    for x in range (pos[1]-200,pos[1]+200):
+        for y in range(pos[0]-200, pos[0]+200):
             a = (x-pos[1])/radx
             b = (y-pos[0])/rady
             minor = pow(a, 2.0)

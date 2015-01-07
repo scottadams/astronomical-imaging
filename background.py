@@ -33,16 +33,18 @@ masked_img.mask = perimeter_mask
 x = calc(masked_img)
 
 # the histogram of the data
-n, bins, patches = plt.hist(x, 3000, normed=1, facecolor='green', alpha=0.75)
+n, bins, patches = plt.hist(x, 3000, normed=1, facecolor='green', alpha=0.25)
+
+mu, sigma = 3418, 10
 
 # add a 'best fit' line
-# y = mlab.normpdf( bins, mu, sigma)
-# l = plt.plot(bins, y, 'r--', linewidth=1)
+y = mlab.normpdf(bins, mu, sigma)
+l = plt.plot(bins, y, 'r--', linewidth=1)
 
 plt.xlabel('frequency')
 plt.ylabel('counts')
 plt.title(r'histogram')
-#plt.axis([3300, 3600, 0, 0.06])
+plt.axis([3300, 3600, 0, 0.06])
 plt.grid(True)
 plt.show()
 #plt.axis([3300, 3600, 0, 0.1])
