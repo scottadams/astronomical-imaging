@@ -142,7 +142,7 @@ def catalogue(image, master, bg):
 
     f.write('Galaxy Number,X coord,Y coord,X radius,Y radius,Pixel Count \n')
 
-    while image.max()>3600:                   #Dictates how many loops of the cycle are done
+    while image.max()>4000:                   #Dictates how many loops of the cycle are done
 
         max = image.max()                       #finds the max value in the image
         list = image.flatten()                  #flattens the image into a 1D list
@@ -197,8 +197,8 @@ def ovalphotometry(image, pos, radx, rady):
     mask = ma.getmaskarray(image)
 
 
-    for x in range (pos[1]-int(1.1*radx), pos[1]+int(1.1*radx)):
-        for y in range(pos[0]-int(1.1*rady), pos[0]+int(1.1*rady)):
+    for x in range (pos[1]-radx, pos[1]+radx):
+        for y in range(pos[0]-rady, pos[0]+rady):
             a = (x-pos[1])/radx
             b = (y-pos[0])/rady
             minor = pow(a, 2.0)
