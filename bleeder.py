@@ -19,7 +19,7 @@ def mask_foreground(image, borderdepth):
     #The following mask are created by defining a rectangular area within which bleeding of the main
     #star occurs. Every array element above the background value, defined in 'bleedmask', will be masked.
     #The masks are then merged into the master mask.
-    mask1 = ms.bleedmask(image, 1425, 1445, 0, imgheight) 
+    mask1 = ms.bleedmask(image, 1425, 1450, 0, imgheight) 
     master = merge.merge(master, mask1)
 
     mask1 = ms.bleedmask(image, 1390, 1485, 0, 500)
@@ -40,7 +40,7 @@ def mask_foreground(image, borderdepth):
     mask1 = ms.bleedmask(image, 1423, 1450, 2800, 3000)
     master = merge.merge(master, mask1) 
 
-    mask1 = ms.circle(image, [3215,1436], 100)
+    mask1 = ms.circle(image, [3215,1436], 120)
     master = merge.merge(master, mask1)
 
     #The following masks are constructed using the same principle as above but mask the
@@ -142,7 +142,7 @@ def catalogue(image, master, bg):
 
     f.write('Galaxy Number,X coord,Y coord,X radius,Y radius,Pixel Count \n')
 
-    while image.max()>4000:                   #Dictates how many loops of the cycle are done
+    while image.max()>3450:                   #Dictates how many loops of the cycle are done
 
         max = image.max()                       #finds the max value in the image
         list = image.flatten()                  #flattens the image into a 1D list
@@ -170,7 +170,7 @@ def catalogue(image, master, bg):
             master = merge.merge(master, new_mask)  #merges the most recent mask to the master
 
             image.mask = master                     #applies the mask to the image so that we don't count the same objects when we repeat the loop
-            print galaxy_count
+            print galaxy_count, max
 
     return master
 
@@ -221,8 +221,8 @@ def local_background(image, pos, radx, rady):
     pixel_count = 0
     mask = ma.getmaskarray(image)
 
-    for x in range (pos[1]-200,pos[1]+200):
-        for y in range(pos[0]-200, pos[0]+200):
+    for x in range (pos[1]-4*radx,pos[1]+4*radx):
+        for y in range(pos[0]-4*rady, pos[0]+4*rady):
             a = (x-pos[1])/radx
             b = (y-pos[0])/rady
             minor = pow(a, 2.0)

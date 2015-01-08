@@ -13,7 +13,7 @@ def calc(image):
     #frequencies = open('frequencies.txt','a')
     for x in range(0, shape[0]):
         for y in range(0, shape[1]):
-            if image[x,y] > 1000 and image[x,y] < 5000:
+            if image[x,y]>3750:
                 freqarray.append(image[x,y])
     return freqarray
                 #frequencies.write(str(image[x,y]))
@@ -24,27 +24,21 @@ mosaic = fits.open('mosaic.fits') #loads fit file into mosaic
 hdr = mosaic[0].header
 image = mosaic[0].data
 
-perimeter_mask = ms.perim(image, 100)
-
-masked_img = ma.array(image)
-
-masked_img.mask = perimeter_mask
-
-x = calc(masked_img)
+x = calc(image)
 
 # the histogram of the data
-n, bins, patches = plt.hist(x, 3000, normed=1, facecolor='green', alpha=0.25)
+n, bins, patches = plt.hist(x, 70000, normed=1, facecolor='green', alpha=0.25)
 
 mu, sigma = 3418, 10
 
 # add a 'best fit' line
-y = mlab.normpdf(bins, mu, sigma)
-l = plt.plot(bins, y, 'r--', linewidth=1)
+# y = mlab.normpdf(bins, mu, sigma)
+# l = plt.plot(bins, y, 'r--', linewidth=1)
 
 plt.xlabel('frequency')
 plt.ylabel('counts')
 plt.title(r'histogram')
-plt.axis([3300, 3600, 0, 0.06])
+#plt.axis([3300, 3600, 0, 0.06])
 plt.grid(True)
 plt.show()
 #plt.axis([3300, 3600, 0, 0.1])
