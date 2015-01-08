@@ -81,7 +81,7 @@ def ovalmask(image, pos, radx, rady):
             major = pow(b, 2.0)
             oval = minor + major
             #print 'minor axis {val1}. major axis {val2}. Oval val {val3}.'.format(val1 = a, val2 = b, val3 = oval)
-            if oval <= 1 and image[y,x]>3500:
+            if oval <= 1 and image[y,x]>4000:
                 mask[y,x] = True
 
     return mask
