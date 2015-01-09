@@ -13,7 +13,7 @@ def calc(image):
     #frequencies = open('frequencies.txt','a')
     for x in range(0, shape[0]):
         for y in range(0, shape[1]):
-            if image[x,y]>3750:
+            if image[x,y]>1000 and image[x,y]<5000:
                 freqarray.append(image[x,y])
     return freqarray
                 #frequencies.write(str(image[x,y]))
@@ -38,7 +38,7 @@ mu, sigma = 3418, 10
 plt.xlabel('frequency')
 plt.ylabel('counts')
 plt.title(r'histogram')
-#plt.axis([3300, 3600, 0, 0.06])
+plt.axis([3300, 3800, 0, 0.1])
 plt.grid(True)
 plt.show()
 #plt.axis([3300, 3600, 0, 0.1])

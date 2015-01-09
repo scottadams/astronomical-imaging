@@ -65,7 +65,7 @@ def bleedmask(image, x1, x2, y1, y2):
 
     for x in range (x1, x2):                    #examine all the pixels within
         for y in range(y1, y2):                 #the defined area
-            if image[y,x]>3449:                 #if pixel value is larger than background
+            if image[y,x]>3549:                 #if pixel value is larger than background
                 mask[y,x] = True                #create mask at this point.
 
     return mask
@@ -81,7 +81,7 @@ def ovalmask(image, pos, radx, rady):
             major = pow(b, 2.0)
             oval = minor + major
             #print 'minor axis {val1}. major axis {val2}. Oval val {val3}.'.format(val1 = a, val2 = b, val3 = oval)
-            if oval <= 1 and image[y,x]>3449:
+            if oval <= 1 and image[y,x]>3549:
                 mask[y,x] = True
 
     return mask

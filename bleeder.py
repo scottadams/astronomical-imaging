@@ -40,7 +40,7 @@ def mask_foreground(image, borderdepth):
     mask1 = ms.bleedmask(image, 1423, 1450, 2800, 3000)
     master = merge.merge(master, mask1) 
 
-    mask1 = ms.circle(image, [3215,1436], 120)
+    mask1 = ms.circle(image, [3215,1436], 180)
     master = merge.merge(master, mask1)
 
     #The following masks are constructed using the same principle as above but mask the
@@ -142,7 +142,7 @@ def catalogue(image, master, bg):
 
     f.write('Galaxy Number,X coord,Y coord,X radius,Y radius,Pixel Count \n')
 
-    while image.max()>3450:                   #Dictates how many loops of the cycle are done
+    while image.max()>3550:                   #Dictates how many loops of the cycle are done
 
         max = image.max()                       #finds the max value in the image
         list = image.flatten()                  #flattens the image into a 1D list
@@ -159,11 +159,20 @@ def catalogue(image, master, bg):
             rad_x = bld.obj_mask_x(image, pos, bg)
             rad_y = bld.obj_mask_y(image, pos, bg)
 
-            pixel_count = bld.ovalphotometry(image, pos, rad_x, rad_y)
-            #mag = 25.3 - 2.5*math.log(pixel_count,10)
-            galaxy_count += 1
+            if rad_x>1 or rad_y>1:
+
+                pixel_count = bld.ovalphotometry(image, pos, rad_x, rad_y)
+
+                if pixel_count>0:
+                    mag = 25.3 - 2.5*math.log(pixel_count,10)
+                elif pixel_count<0:
+                    mag = 25.3 + 2.5*math.log(-1*pixel_count,10)
+                else:
+                    mag = 25.3
+
+                galaxy_count += 1
             
-            f.write('{number},{posx},{posy},{rad_x},{rad_y},{photo} \n'.format(number = galaxy_count, posx = pos[1], posy = pos[0], photo = pixel_count, rad_x = rad_x, rad_y = rad_y))
+                f.write('{number},{posx},{posy},{rad_x},{rad_y},{photo},{mag} \n'.format(number = galaxy_count, posx = pos[1], posy = pos[0], photo = pixel_count, rad_x = rad_x, rad_y = rad_y, mag = mag))
 
             new_mask = bld.obj_mask(image, pos, bg) #creates a circular mask over the image
 
@@ -192,7 +201,7 @@ def photometry(image, pos, rad):
     return sum
 
 def ovalphotometry(image, pos, radx, rady):
-    sum = 0
+    sum = 0.0
     pixel_count = 0
     mask = ma.getmaskarray(image)
 
