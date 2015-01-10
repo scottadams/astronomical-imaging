@@ -12,7 +12,7 @@ def zeros(image):
         ycoord = int(location[z]/2570)      #calculates the x and y co-ordinates
         xcoord = location[z]-(2570*ycoord)  #using the fact we know the shape of the original image
         m = np.median(image[ycoord-2:ycoord+2, xcoord-2:xcoord+2])
-        image[ycoord, xcoord] = m
+        image[ycoord, xcoord] = 3418
 
     return image
     

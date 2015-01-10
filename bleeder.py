@@ -38,9 +38,15 @@ def mask_foreground(image, borderdepth):
     master = merge.merge(master, mask1)
 
     mask1 = ms.bleedmask(image, 1423, 1450, 2800, 3000)
+    master = merge.merge(master, mask1)
+
+    mask1 = ms.ovalmask(image, [2976,1417], 7, 10)
     master = merge.merge(master, mask1) 
 
-    mask1 = ms.circle(image, [3215,1436], 180)
+    mask1 = ms.ovalmask(image, [2962,1493], 5, 5)
+    master = merge.merge(master, mask1) 
+
+    mask1 = ms.circle(image, [3215,1436], 200)
     master = merge.merge(master, mask1)
 
     #The following masks are constructed using the same principle as above but mask the
@@ -108,13 +114,16 @@ def obj_mask(image, pos, bg):                   #function to determine whether t
 def obj_mask_y(image, pos, bg):
 
     imgheight = image.shape[0]-1    #load image dimensions for use later
+    mask = ma.getmaskarray(image)
 
     for y in range (1,imgheight-pos[0]): #create loop from initial position to maximum border
-        a = [image[pos[0]+y-2,pos[1]], image[pos[0]+y-1,pos[1]], image[pos[0]+y,pos[1]]] #create an array with the values of 3 successive pixels in the y direction
+        a = [image[pos[0]+y,pos[1]-1], image[pos[0]+y,pos[1]], image[pos[0]+y,pos[1]+1]] #create an array with the values of 3 successive pixels in the y direction
         b = np.array(a)                  #turn this into a numpy array so we can use numpy operations on it
         m = np.median(b)                #find the median of the array
         if y >= imgheight - pos[0] - 100:   #if y has reached the boundary mask this is max y value
             return y
+        if mask[y,pos[1]] == True:
+            return y-1
         if m<bg:                            #if the median is less than back ground, this is max y value.
             return y
 
@@ -123,13 +132,16 @@ def obj_mask_x(image, pos, bg):
 
     imgheight = image.shape[0]-1
     imgwidth = image.shape[1]-1
+    mask = ma.getmaskarray(image)
 
     for x in range (1,imgwidth-pos[1]):
-        a = [image[pos[0],pos[1]+x-2], image[pos[0],pos[1]+x-1], image[pos[0],pos[1]+x]]
+        a = [image[pos[0]-1,pos[1]+x], image[pos[0],pos[1]+x], image[pos[0]+1,pos[1]+x]]
         b = np.array(a)
         m = np.median(b)
         if x >= imgwidth - pos[1] - 100:
             return x
+        if mask[pos[0], x] == True:
+            return x-1
         if m<bg:
             return x
 
@@ -140,9 +152,9 @@ def catalogue(image, master, bg):
     f = open('data.csv', 'w')
     galaxy_count = 0
 
-    f.write('Galaxy Number,X coord,Y coord,X radius,Y radius,Pixel Count \n')
+    f.write('Galaxy Number,X coord,Y coord,X radius,Y radius,Max Pixel,Pixel Count,Magnitude \n')
 
-    while image.max()>3550:                   #Dictates how many loops of the cycle are done
+    while image.max()>3500:                   #Dictates how many loops of the cycle are done
 
         max = image.max()                       #finds the max value in the image
         list = image.flatten()                  #flattens the image into a 1D list
@@ -172,14 +184,14 @@ def catalogue(image, master, bg):
 
                 galaxy_count += 1
             
-                f.write('{number},{posx},{posy},{rad_x},{rad_y},{photo},{mag} \n'.format(number = galaxy_count, posx = pos[1], posy = pos[0], photo = pixel_count, rad_x = rad_x, rad_y = rad_y, mag = mag))
+                f.write('{number},{posx},{posy},{rad_x},{rad_y},{max_pixel},{photo},{mag} \n'.format(number = galaxy_count, posx = pos[1], posy = pos[0], photo = pixel_count, rad_x = rad_x, rad_y = rad_y, mag = mag, max_pixel = max))
 
             new_mask = bld.obj_mask(image, pos, bg) #creates a circular mask over the image
 
             master = merge.merge(master, new_mask)  #merges the most recent mask to the master
 
             image.mask = master                     #applies the mask to the image so that we don't count the same objects when we repeat the loop
-            print galaxy_count, max
+            print galaxy_count, pos, rad_x, rad_y, max
 
     return master
 
@@ -230,16 +242,18 @@ def local_background(image, pos, radx, rady):
     pixel_count = 0
     mask = ma.getmaskarray(image)
 
-    for x in range (pos[1]-4*radx,pos[1]+4*radx):
-        for y in range(pos[0]-4*rady, pos[0]+4*rady):
+
+    for x in range (pos[1]-2*radx,pos[1]+2*radx):
+        for y in range(pos[0]-2*rady, pos[0]+2*rady):
             a = (x-pos[1])/radx
             b = (y-pos[0])/rady
             minor = pow(a, 2.0)
             major = pow(b, 2.0)
             oval = minor + major
-            if oval >= 1 and oval <=4 and mask[y,x] == False:
-                sum += image[y,x]
-                pixel_count += 1
+            if oval >= 1 and oval <=4 and 0<x<2570 and 0<y<4611:
+                if mask[y,x] == False:
+                    sum += image[y,x]
+                    pixel_count += 1
 
     bg = int(sum/pixel_count)
 
