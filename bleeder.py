@@ -28,7 +28,7 @@ def mask_foreground(image, borderdepth):
     mask1 = ms.bleedmask(image, 1100, 1660, 400, 460)
     master = merge.merge(master, mask1)
     
-    mask1 = ms.bleedmask(image, 1000, 1690, 298, 343)
+    mask1 = ms.bleedmask(image, 1000, 1700, 298, 350)
     master = merge.merge(master, mask1)
 
     mask1 = ms.bleedmask(image, 1278, 1533, 105, 150)
@@ -52,22 +52,22 @@ def mask_foreground(image, borderdepth):
     #The following masks are constructed using the same principle as above but mask the
     #remaining principal foreground objects.
 
-    mask1 = ms.ovalmask(image, [2286, 905], 20, 80)
+    mask1 = ms.ovalmask(image, [2286, 905], 30, 80)
     master = merge.merge(master, mask1)
 
-    mask1 = ms.ovalmask(image, [3320,775], 25, 130)
+    mask1 = ms.ovalmask(image, [3320,775], 35, 130)
     master = merge.merge(master, mask1)
 
-    mask1 = ms.ovalmask(image, [2773, 973], 25, 85)
+    mask1 = ms.ovalmask(image, [2773, 973], 35, 95)
     master = merge.merge(master, mask1)
 
-    mask1 = ms.ovalmask(image, [3757,2133], 20, 65)
+    mask1 = ms.ovalmask(image, [3757,2133], 30, 75)
     master = merge.merge(master, mask1)
 
-    mask1 = ms.ovalmask(image, [2310,2131], 20, 35)
+    mask1 = ms.ovalmask(image, [2310,2131], 30, 45)
     master = merge.merge(master, mask1)
 
-    mask1 = ms.ovalmask(image, [1425,2088], 20, 35)
+    mask1 = ms.ovalmask(image, [1425,2088], 30, 45)
     master = merge.merge(master, mask1)
 
     return master
@@ -104,8 +104,14 @@ def obj_mask(image, pos, bg):                   #function to determine whether t
     rad_x = bld.obj_mask_y(image, pos, bg)      #calculate max extent in x direction
     rad_y = bld.obj_mask_x(image, pos, bg)      #calculate max extent in y direction
 
+    if rad_x>=rad_y:
+        radius = rad_x
+    else:
+        radius = rad_y
+
     #mask = ms.bleedmask(image, pos[1]-rad_x, pos[1]+rad_x, pos[0]-rad_y, pos[0]+rad_y)
-    mask = ms.ovalmask(image, pos, rad_x, rad_y)
+    #mask = ms.ovalmask(image, pos, rad_x, rad_y)
+    mask = ms.circle(image, pos, radius)
 
     return mask
 
@@ -120,12 +126,9 @@ def obj_mask_y(image, pos, bg):
         a = [image[pos[0]+y,pos[1]-1], image[pos[0]+y,pos[1]], image[pos[0]+y,pos[1]+1]] #create an array with the values of 3 successive pixels in the y direction
         b = np.array(a)                  #turn this into a numpy array so we can use numpy operations on it
         m = np.median(b)                #find the median of the array
-        #print m
-        if y >= imgheight - pos[0] - 100: #or mask[y,pos[1]] == False:   #if y has reached the boundary mask this is max y value
+        if y >= imgheight - pos[0] - 100 or mask[pos[0]+y,pos[1]] == True:   #if y has reached the boundary mask this is max y value
             return y
-        #if mask[y,pos[1]] == True:
-            #return y
-        if m<bg:                            #if the median is less than back ground, this is max y value.
+        if m<bg+30:                            #if the median is less than back ground, this is max y value.
             return y
 
 
@@ -139,24 +142,21 @@ def obj_mask_x(image, pos, bg):
         a = [image[pos[0]-1,pos[1]+x], image[pos[0],pos[1]+x], image[pos[0]+1,pos[1]+x]]
         b = np.array(a)
         m = np.median(b)
-        #print m
-        if x >= imgwidth - pos[1] - 100: #or mask[pos[0], x] == False:
+        if x >= imgwidth - pos[1] - 100 or mask[pos[0], pos[1]+x] == True:
             return x
-        #if mask[pos[0], x] == True:
-            #return x
-        if m<bg:
+        if m<bg+30:
             return x
 
 
 
-def catalogue(image, master, bg):
+def catalogue(image, master, lower_limit, bg):
 
     f = open('data.csv', 'w')
     galaxy_count = 0
 
     f.write('Galaxy Number,X coord,Y coord,X radius,Y radius,Max Pixel,Pixel Count,Magnitude \n')
 
-    while image.max()>5000:                   #Dictates how many loops of the cycle are done
+    while image.max()>lower_limit:                   #Dictates how many loops of the cycle are done
 
         max = image.max()                       #finds the max value in the image
         list = image.flatten()                  #flattens the image into a 1D list
@@ -173,20 +173,23 @@ def catalogue(image, master, bg):
             rad_x = bld.obj_mask_x(image, pos, bg)
             rad_y = bld.obj_mask_y(image, pos, bg)
 
-            if rad_x>1 or rad_y>1:
+            if rad_x>=rad_y:
+                radius = rad_x
+            else:
+                radius = rad_y
 
-                pixel_count = bld.ovalphotometry(image, pos, rad_x, rad_y)
+            pixel_count = bld.ovalphotometry(image, pos, radius, radius)
 
-                if pixel_count>0:
-                    mag = 25.3 - 2.5*math.log(pixel_count,10)
-                elif pixel_count<0:
-                    mag = 25.3 + 2.5*math.log(-1*pixel_count,10)
-                else:
-                    mag = 25.3
+            if pixel_count>0:
+                mag = 25.3 - 2.5*math.log(pixel_count,10)
+            elif pixel_count<0:
+                mag = 25.3 + 2.5*math.log(-1*pixel_count,10)
+            else:
+                mag = 25.3
 
-                galaxy_count += 1
+            galaxy_count += 1
             
-                f.write('{number},{posx},{posy},{rad_x},{rad_y},{max_pixel},{photo},{mag} \n'.format(number = galaxy_count, posx = pos[1], posy = pos[0], photo = pixel_count, rad_x = rad_x, rad_y = rad_y, mag = mag, max_pixel = max))
+            f.write('{number},{posx},{posy},{rad_x},{rad_y},{max_pixel},{photo},{mag} \n'.format(number = galaxy_count, posx = pos[1], posy = pos[0], photo = pixel_count, rad_x = rad_x, rad_y = rad_y, mag = mag, max_pixel = max))
 
             new_mask = bld.obj_mask(image, pos, bg) #creates a circular mask over the image
 
@@ -227,9 +230,10 @@ def ovalphotometry(image, pos, radx, rady):
             minor = pow(a, 2.0)
             major = pow(b, 2.0)
             oval = minor + major
-            if oval <= 1 and mask[y,x] == False:
-                sum += image[y,x]
-                pixel_count += 1
+            if 0<x<2570 and 0<y<4611:
+                if oval <= 1 and mask[y,x] == False:
+                    sum += image[y,x]
+                    pixel_count += 1
 
     bg = local_background(image, pos, radx, rady)
 
@@ -241,7 +245,7 @@ def ovalphotometry(image, pos, radx, rady):
 def local_background(image, pos, radx, rady):
 
     sum = 0
-    pixel_count = 0
+    pixel_count = 1
     mask = ma.getmaskarray(image)
 
 
@@ -262,8 +266,56 @@ def local_background(image, pos, radx, rady):
     return bg
 
 
+def catalogued(image, master, lower_limit, bg):
 
+    f = open('data.csv', 'w')
+    galaxy_count = 0
 
+    f.write('Galaxy Number,X coord,Y coord,X radius,Y radius,Max Pixel,Pixel Count,Magnitude \n')
+
+    while image.max()>lower_limit:                   #Dictates how many loops of the cycle are done
+
+        max = image.max()                       #finds the max value in the image
+        list = image.flatten()                  #flattens the image into a 1D list
+        location = np.where(list == max)[0]     #finds the position of all the maxima
+
+        length = location.size                  #calculates how many maxima are present
+
+        #for z in range (0, length):             #Loop which repeats as many times as there are maxima
+
+        ycoord = int(location[0]/2570)      #calculates the x and y co-ordinates
+        xcoord = location[0]-(2570*ycoord)  #using the fact we know the shape of the original image
+
+        pos = [ycoord, xcoord]              #stores the xy co-ordinates in pos
+        rad_x = bld.obj_mask_x(image, pos, bg)
+        rad_y = bld.obj_mask_y(image, pos, bg)
+
+        if rad_x>=rad_y:
+            radius = rad_x
+        else:
+            radius = rad_y
+
+        pixel_count = bld.ovalphotometry(image, pos, radius, radius)
+
+        if pixel_count>0:
+            mag = 25.3 - 2.5*math.log(pixel_count,10)
+        elif pixel_count<0:
+            mag = 25.3 + 2.5*math.log(-1*pixel_count,10)
+        else:
+            mag = 25.3
+
+        galaxy_count += 1
+            
+        f.write('{number},{posx},{posy},{rad_x},{rad_y},{max_pixel},{photo},{mag} \n'.format(number = galaxy_count, posx = pos[1], posy = pos[0], photo = pixel_count, rad_x = rad_x, rad_y = rad_y, mag = mag, max_pixel = max))
+
+        new_mask = bld.obj_mask(image, pos, bg) #creates a circular mask over the image
+
+        master = merge.merge(master, new_mask)  #merges the most recent mask to the master
+
+        image.mask = master                     #applies the mask to the image so that we don't count the same objects when we repeat the loop
+        print galaxy_count, pos, rad_x, rad_y, max
+
+    return master
 
 
 

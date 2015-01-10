@@ -32,7 +32,7 @@ master = merge.merge(master, bright_obj)
 
 masked_img.mask = master
 
-master = bld.catalogue(masked_img, master, 3457)
+master = bld.catalogued(masked_img, master, 3500, 3457)
 
 masked_mag.mask = master
 

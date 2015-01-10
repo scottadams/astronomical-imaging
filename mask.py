@@ -65,7 +65,7 @@ def bleedmask(image, x1, x2, y1, y2):
 
     for x in range (x1, x2):                    #examine all the pixels within
         for y in range(y1, y2):                 #the defined area
-            if image[y,x]>4000:                 #if pixel value is larger than background
+            if image[y,x]>3418:                 #if pixel value is larger than background
                 mask[y,x] = True                #create mask at this point.
 
     return mask
