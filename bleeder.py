@@ -120,10 +120,11 @@ def obj_mask_y(image, pos, bg):
         a = [image[pos[0]+y,pos[1]-1], image[pos[0]+y,pos[1]], image[pos[0]+y,pos[1]+1]] #create an array with the values of 3 successive pixels in the y direction
         b = np.array(a)                  #turn this into a numpy array so we can use numpy operations on it
         m = np.median(b)                #find the median of the array
-        if y >= imgheight - pos[0] - 100:   #if y has reached the boundary mask this is max y value
+        #print m
+        if y >= imgheight - pos[0] - 100: #or mask[y,pos[1]] == False:   #if y has reached the boundary mask this is max y value
             return y
-        if mask[y,pos[1]] == True:
-            return y-1
+        #if mask[y,pos[1]] == True:
+            #return y
         if m<bg:                            #if the median is less than back ground, this is max y value.
             return y
 
@@ -138,10 +139,11 @@ def obj_mask_x(image, pos, bg):
         a = [image[pos[0]-1,pos[1]+x], image[pos[0],pos[1]+x], image[pos[0]+1,pos[1]+x]]
         b = np.array(a)
         m = np.median(b)
-        if x >= imgwidth - pos[1] - 100:
+        #print m
+        if x >= imgwidth - pos[1] - 100: #or mask[pos[0], x] == False:
             return x
-        if mask[pos[0], x] == True:
-            return x-1
+        #if mask[pos[0], x] == True:
+            #return x
         if m<bg:
             return x
 
@@ -154,7 +156,7 @@ def catalogue(image, master, bg):
 
     f.write('Galaxy Number,X coord,Y coord,X radius,Y radius,Max Pixel,Pixel Count,Magnitude \n')
 
-    while image.max()>3500:                   #Dictates how many loops of the cycle are done
+    while image.max()>5000:                   #Dictates how many loops of the cycle are done
 
         max = image.max()                       #finds the max value in the image
         list = image.flatten()                  #flattens the image into a 1D list
