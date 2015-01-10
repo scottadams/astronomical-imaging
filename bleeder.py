@@ -149,7 +149,7 @@ def obj_mask_x(image, pos, bg):
 
 
 
-def catalogue(image, master, lower_limit, bg):
+"""def catalogue(image, master, lower_limit, bg):
 
     f = open('data.csv', 'w')
     galaxy_count = 0
@@ -198,15 +198,15 @@ def catalogue(image, master, lower_limit, bg):
             image.mask = master                     #applies the mask to the image so that we don't count the same objects when we repeat the loop
             print galaxy_count, pos, rad_x, rad_y, max
 
-    return master
+    return master"""
 
 def photometry(image, pos, rad):
     sum = 0
     pixel_count = 0
     mask = ma.getmaskarray(image)
 
-    for x in range (pos[1]-1.1*rad, pos[1]+1.1*rad):
-        for y in range (pos[0]-1.1*rad, pos[0]+1.1*rad):
+    for x in range (pos[1]-rad, pos[1]+rad):
+        for y in range (pos[0]-rad, pos[0]+rad):
             if mask[y,x] == False:
                 sum += image[y, x]
                 pixel_count += 1
@@ -278,10 +278,6 @@ def catalogued(image, master, lower_limit, bg):
         max = image.max()                       #finds the max value in the image
         list = image.flatten()                  #flattens the image into a 1D list
         location = np.where(list == max)[0]     #finds the position of all the maxima
-
-        length = location.size                  #calculates how many maxima are present
-
-        #for z in range (0, length):             #Loop which repeats as many times as there are maxima
 
         ycoord = int(location[0]/2570)      #calculates the x and y co-ordinates
         xcoord = location[0]-(2570*ycoord)  #using the fact we know the shape of the original image

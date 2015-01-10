@@ -36,6 +36,8 @@ master = bld.catalogued(masked_img, master, 3500, 3457)
 
 masked_mag.mask = master
 
+masked_img.writeto('masked.fits', clobber=True)
+
 p.plot(masked_img)
 
 ############ MIGHT BE USEFUL LATER ############
