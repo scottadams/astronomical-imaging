@@ -46,28 +46,28 @@ def mask_foreground(image, borderdepth):
     mask1 = ms.ovalmask(image, [2962,1493], 5, 5)
     master = merge.merge(master, mask1) 
 
-    mask1 = ms.circle(image, [3215,1436], 200)
+    mask1 = ms.circle(image, [3215,1436], 300)
     master = merge.merge(master, mask1)
 
     #The following masks are constructed using the same principle as above but mask the
     #remaining principal foreground objects.
 
-    mask1 = ms.ovalmask(image, [2286, 905], 30, 80)
+    mask1 = ms.ovalmask(image, [2286, 905], 40, 80)
     master = merge.merge(master, mask1)
 
-    mask1 = ms.ovalmask(image, [3320,775], 35, 130)
+    mask1 = ms.ovalmask(image, [3320,775], 45, 130)
     master = merge.merge(master, mask1)
 
-    mask1 = ms.ovalmask(image, [2773, 973], 35, 95)
+    mask1 = ms.ovalmask(image, [2773, 973], 45, 95)
     master = merge.merge(master, mask1)
 
-    mask1 = ms.ovalmask(image, [3757,2133], 30, 75)
+    mask1 = ms.ovalmask(image, [3757,2133], 40, 75)
     master = merge.merge(master, mask1)
 
-    mask1 = ms.ovalmask(image, [2310,2131], 30, 45)
+    mask1 = ms.ovalmask(image, [2310,2131], 40, 45)
     master = merge.merge(master, mask1)
 
-    mask1 = ms.ovalmask(image, [1425,2088], 30, 45)
+    mask1 = ms.ovalmask(image, [1425,2088], 40, 45)
     master = merge.merge(master, mask1)
 
     return master
@@ -128,7 +128,7 @@ def obj_mask_y(image, pos, bg):
         m = np.median(b)                #find the median of the array
         if y >= imgheight - pos[0] - 100 or mask[pos[0]+y,pos[1]] == True:   #if y has reached the boundary mask this is max y value
             return y
-        if m<bg+30:                            #if the median is less than back ground, this is max y value.
+        if m<bg:                            #if the median is less than back ground, this is max y value.
             return y
 
 
@@ -144,7 +144,7 @@ def obj_mask_x(image, pos, bg):
         m = np.median(b)
         if x >= imgwidth - pos[1] - 100 or mask[pos[0], pos[1]+x] == True:
             return x
-        if m<bg+30:
+        if m<bg:
             return x
 
 
@@ -223,8 +223,8 @@ def ovalphotometry(image, pos, radx, rady):
     mask = ma.getmaskarray(image)
 
 
-    for x in range (pos[1]-radx, pos[1]+radx):
-        for y in range(pos[0]-rady, pos[0]+rady):
+    for x in range (pos[1]-int(1.2*radx), pos[1]+int(1.2*radx)):
+        for y in range(pos[0]-int(1.2*rady), pos[0]+int(1.2*rady)):
             a = (x-pos[1])/radx
             b = (y-pos[0])/rady
             minor = pow(a, 2.0)
@@ -235,35 +235,39 @@ def ovalphotometry(image, pos, radx, rady):
                     sum += image[y,x]
                     pixel_count += 1
 
-    bg = local_background(image, pos, radx, rady)
+    bg, bg_count = local_background(image, pos, radx, rady)
 
-    sum = sum - bg*pixel_count
+    sum = int(sum - bg*pixel_count)
 
-    return sum
+    return sum, bg, bg_count
 
 
 def local_background(image, pos, radx, rady):
 
     sum = 0
-    pixel_count = 1
+    pixel_count = 0
     mask = ma.getmaskarray(image)
 
 
-    for x in range (pos[1]-2*radx,pos[1]+2*radx):
-        for y in range(pos[0]-2*rady, pos[0]+2*rady):
+    for x in range (pos[1]-4*radx,pos[1]+4*radx):
+        for y in range(pos[0]-4*rady, pos[0]+4*rady):
             a = (x-pos[1])/radx
             b = (y-pos[0])/rady
             minor = pow(a, 2.0)
             major = pow(b, 2.0)
             oval = minor + major
-            if oval >= 1 and oval <=4 and 0<x<2570 and 0<y<4611:
+            if oval >= 1 and oval <=8 and 0<x<2570 and 0<y<4611:
                 if mask[y,x] == False:
                     sum += image[y,x]
                     pixel_count += 1
 
-    bg = int(sum/pixel_count)
-
-    return bg
+    if pixel_count == 0:
+        pixel_count = 1
+        bg = sum/pixel_count
+        return bg, pixel_count
+    else:
+        bg = sum/pixel_count
+        return bg, pixel_count
 
 
 def catalogued(image, master, lower_limit, bg):
@@ -271,7 +275,7 @@ def catalogued(image, master, lower_limit, bg):
     f = open('data.csv', 'w')
     galaxy_count = 0
 
-    f.write('Galaxy Number,X coord,Y coord,X radius,Y radius,Max Pixel,Pixel Count,Magnitude \n')
+    f.write('Galaxy Number,X coord,Y coord,X radius,Y radius,Max Pixel,Local Background,Pixel Count,Photon Count,Magnitude \n')
 
     while image.max()>lower_limit:                   #Dictates how many loops of the cycle are done
 
@@ -291,25 +295,25 @@ def catalogued(image, master, lower_limit, bg):
         else:
             radius = rad_y
 
-        pixel_count = bld.ovalphotometry(image, pos, radius, radius)
+        counts, local_background, pixel_count = bld.ovalphotometry(image, pos, radius, radius)
 
-        if pixel_count>0:
-            mag = 25.3 - 2.5*math.log(pixel_count,10)
-        elif pixel_count<0:
-            mag = 25.3 + 2.5*math.log(-1*pixel_count,10)
+        if counts>0:
+            mag = 25.3 - 2.5*math.log(counts,10)
+        elif counts<0:
+            mag = 25.3 + 2.5*math.log(-1*counts,10)
         else:
             mag = 25.3
 
         galaxy_count += 1
             
-        f.write('{number},{posx},{posy},{rad_x},{rad_y},{max_pixel},{photo},{mag} \n'.format(number = galaxy_count, posx = pos[1], posy = pos[0], photo = pixel_count, rad_x = rad_x, rad_y = rad_y, mag = mag, max_pixel = max))
+        f.write('{number},{posx},{posy},{rad_x},{rad_y},{max_pixel},{bg},{pixel_count},{photo},{mag} \n'.format(number = galaxy_count, posx = pos[1], posy = pos[0], photo = counts, rad_x = rad_x, rad_y = rad_y, mag = mag, max_pixel = max, bg = local_background, pixel_count = pixel_count))
 
         new_mask = bld.obj_mask(image, pos, bg) #creates a circular mask over the image
 
         master = merge.merge(master, new_mask)  #merges the most recent mask to the master
 
         image.mask = master                     #applies the mask to the image so that we don't count the same objects when we repeat the loop
-        print galaxy_count, pos, rad_x, rad_y, max
+        print galaxy_count, pos, rad_x, rad_y, max, local_background, pixel_count
 
     return master
 
