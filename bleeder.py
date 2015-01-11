@@ -223,8 +223,8 @@ def ovalphotometry(image, pos, radx, rady):
     mask = ma.getmaskarray(image)
 
 
-    for x in range (pos[1]-int(1.2*radx), pos[1]+int(1.2*radx)):
-        for y in range(pos[0]-int(1.2*rady), pos[0]+int(1.2*rady)):
+    for x in range (pos[1]-radx, pos[1]+radx):
+        for y in range(pos[0]-rady, pos[0]+rady):
             a = (x-pos[1])/radx
             b = (y-pos[0])/rady
             minor = pow(a, 2.0)
