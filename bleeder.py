@@ -295,18 +295,20 @@ def catalogued(image, master, lower_limit, bg):
         else:
             radius = rad_y
 
-        counts, local_background, pixel_count = bld.ovalphotometry(image, pos, radius, radius)
+        if radius>1:
 
-        if counts>0:
-            mag = 25.3 - 2.5*math.log(counts,10)
-        elif counts<0:
-            mag = 25.3 + 2.5*math.log(-1*counts,10)
-        else:
-            mag = 25.3
+            counts, local_background, pixel_count = bld.ovalphotometry(image, pos, radius, radius)
 
-        galaxy_count += 1
+            if counts>0:
+                mag = 25.3 - 2.5*math.log(counts,10)
+            elif counts<0:
+                mag = 25.3 + 2.5*math.log(-1*counts,10)
+            else:
+                mag = 25.3
+
+            galaxy_count += 1
             
-        f.write('{number},{posx},{posy},{rad_x},{rad_y},{max_pixel},{bg},{pixel_count},{photo},{mag} \n'.format(number = galaxy_count, posx = pos[1], posy = pos[0], photo = counts, rad_x = rad_x, rad_y = rad_y, mag = mag, max_pixel = max, bg = local_background, pixel_count = pixel_count))
+            f.write('{number},{posx},{posy},{rad_x},{rad_y},{max_pixel},{bg},{pixel_count},{photo},{mag} \n'.format(number = galaxy_count, posx = pos[1], posy = pos[0], photo = counts, rad_x = rad_x, rad_y = rad_y, mag = mag, max_pixel = max, bg = local_background, pixel_count = pixel_count))
 
         new_mask = bld.obj_mask(image, pos, bg) #creates a circular mask over the image
 
